@@ -1,0 +1,38 @@
+#include <pthread.h>
+#include <stdio.h>
+#define NUM_HILOS 5
+int comparte=0;
+int turn=0;
+void *DiHola(void *hiloid)
+{
+long tid;
+tid = (long)hiloid;
+ /* zona critica */
+while (turn != tid){}
+int tmp=comparte;
+sleep(1);
+tmp=tmp+1;
+comparte=tmp;
+turn+=1 ;
+if(turn==NUM_HILOS)
+turn=0;
+/* fin zc */
+printf("Soy el hilo #%ld! valor=%d\n", tid,comparte);
+pthread_exit(NULL);
+}
+int main (int argc, char *argv[])
+{
+pthread_t hilos[NUM_HILOS];
+int rc;
+long t;
+for(t=0; t<NUM_HILOS; t++){
+printf("Soy la rutina principal y mi identificador es %ld\n", t);
+   rc = pthread_create(&hilos[t], NULL, DiHola, (void *)t);
+   if (rc){
+      printf("ERROR: El código es %d\n", rc);
+      exit(-1);
+   }
+}
+pthread_exit(NULL);
+printf("comparte=%d\n",comparte);
+}
